@@ -1,0 +1,27 @@
+language: go
+
+go:
+  - 1.9
+  - tip
+
+os:
+  - linux
+  - osx
+
+matrix:
+  allow_failures:
+    - go: tip
+  fast_finish: true  # don't wait for tip tests to finish before marking build "succeeded"
+
+# skip the install step. don't `go get` deps. only build with code in vendor/
+install: true
+
+before_script:
+  - go get honnef.co/go/tools/cmd/megacheck
+  - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)
+
+script:
+  - test -z $(gofmt -s -l $GO_FILES)
+  - go vet ./...
+  - megacheck ./...
+  - go test -v -race $PKGS
